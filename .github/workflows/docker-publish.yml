@@ -1,9 +1,13 @@
 name: Docker Image Release
 
+#on:
+#  push:
+#    tags:
+#      - 'v*'  # Trigger on version tags like v1.0.0
 on:
   push:
-    tags:
-      - 'v*'  # Trigger on version tags like v1.0.0
+    branches:
+      - docker
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
