@@ -57,6 +57,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ${{ steps.image_names.outputs.dockerhub_image }}:latest
-            # ${{ steps.image_names.outputs.dockerhub_image }}:${{ steps.tag.outputs.tag }}
             ${{ steps.image_names.outputs.ghcr_image }}:latest
-            # ${{ steps.image_names.outputs.ghcr_image }}:${{ steps.tag.outputs.tag }}
