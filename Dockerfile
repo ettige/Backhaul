@@ -3,7 +3,7 @@
 ########################
 # 1. Build with Go     #
 ########################
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 LABEL stage=builder
 
 # Install git, ca-certificates
