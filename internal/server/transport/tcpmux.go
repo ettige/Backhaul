@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/musix/backhaul/internal/utils"
+	"github.com/musix/backhaul/internal/utils/handlers"
+	"github.com/musix/backhaul/internal/utils/network"
 	"github.com/musix/backhaul/internal/web"
 
 	"github.com/sirupsen/logrus"
@@ -53,7 +55,9 @@ type TcpMuxConfig struct {
 	WebPort          int
 	KeepAlive        time.Duration
 	Heartbeat        time.Duration // in seconds
-
+	MSS              int
+	SO_RCVBUF        int
+	SO_SNDBUF        int
 }
 
 func NewTcpMuxServer(parentCtx context.Context, config *TcpMuxConfig, logger *logrus.Logger) *TcpMuxTransport {
@@ -282,7 +286,15 @@ func (s *TcpMuxTransport) channelHandler() {
 }
 
 func (s *TcpMuxTransport) tunnelListener() {
-	listener, err := net.Listen("tcp", s.config.BindAddr)
+	listener, err := network.ListenWithBuffers(
+		"tcp",
+		s.config.BindAddr,
+		s.config.SO_RCVBUF,
+		s.config.SO_SNDBUF,
+		s.config.MSS,
+		s.config.KeepAlive,
+		!s.config.Nodelay,
+	)
 	if err != nil {
 		s.logger.Fatalf("failed to start listener on %s: %v", s.config.BindAddr, err)
 		return
@@ -593,7 +605,7 @@ func (s *TcpMuxTransport) handleSession(session *smux.Session) {
 
 			// Handle data exchange between connections
 			go func() {
-				utils.TCPConnectionHandler(stream, incomingConn.conn, s.logger, s.usageMonitor, incomingConn.conn.LocalAddr().(*net.TCPAddr).Port, s.config.Sniffer)
+				handlers.TCPConnectionHandler(s.ctx, stream, incomingConn.conn, s.logger, s.usageMonitor, incomingConn.conn.LocalAddr().(*net.TCPAddr).Port, s.config.Sniffer)
 				atomic.AddInt32(&s.streamCounter, -1)
 				<-counter // read signal from the channel
 			}()

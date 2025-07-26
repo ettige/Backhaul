@@ -22,7 +22,7 @@ var (
 )
 
 // Define the version of the application
-const version = "v0.6.6"
+const version = "v0.7.1"
 
 func main() {
 	configPath = flag.String("c", "", "path to the configuration file (TOML format)")
@@ -40,9 +40,6 @@ func main() {
 	if *configPath == "" {
 		logger.Fatalf("Usage: %s -c /path/to/config.toml", flag.CommandLine.Name())
 	}
-
-	// Apply temporary TCP optimizations at startup
-	cmd.ApplyTCPTuning()
 
 	// Create a context for graceful shutdown handling
 	ctx, cancel = context.WithCancel(context.Background())
